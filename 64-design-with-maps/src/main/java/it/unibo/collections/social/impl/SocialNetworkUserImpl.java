@@ -36,7 +36,12 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      * In order to save the people followed by a user organized in groups, adopt
      * a generic-type Map:  think of what type of keys and values would best suit the requirements
      */
-
+    private List<U> followed = new ArrayList<U>();
+    /**
+     * la mappa di riferimento usa come chiave il nome del gruppo, ad ogni gruppo corrisponde una lista
+     * di utenti che vi partecipa
+     */
+    private Map<String,List<U>> groups = new HashMap<>();
     /*
      * [CONSTRUCTORS]
      *
@@ -62,12 +67,15 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, userAge);
     }
 
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
+    public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        this(name, surname, user, -1);
+    }
 
     /*
      * [METHODS]
@@ -76,6 +84,21 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
+
+        if (!this.groups.containsKey(circle)) {
+            this.groups.put(circle, new ArrayList<>());
+            this.groups.get(circle).add(user);
+            this.followed.add(user);
+            return true;
+
+        } 
+        else if (!this.groups.get(circle).contains(user)) {
+            this.groups.get(circle).add(user);
+            this.followed.add(user);
+            return true;
+
+        }
+
         return false;
     }
 
@@ -86,11 +109,16 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+        if (this.groups.containsKey(groupName)) {
+            return new ArrayList<U>(this.groups.get(groupName));
+        }
+        else {
+            return new ArrayList<U>(List.of());
+        }
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+        return new ArrayList<U>(this.followed);
     }
 }
